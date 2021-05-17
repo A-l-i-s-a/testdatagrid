@@ -11,13 +11,15 @@
             </loader>
         </collection>
     </data>
-    <layout expand="ideasDataGrid">
-        <filter applyTo="ideasDataGrid"
+    <layout expand="ideasDataGrid1">
+        <filter id="filter"
+                applyTo="ideasDataGrid1"
                 dataLoader="ideasDl">
             <properties include=".*"/>
         </filter>
-        <dataGrid id="ideasDataGrid"
+        <dataGrid id="ideasDataGrid1"
                   dataContainer="ideasDc"
+                  height="100%"
                   width="100%">
             <actions>
                 <action id="excel"
@@ -34,19 +36,53 @@
                 <column id="test3"
                         property="test3"/>
             </columns>
-            <buttonsPanel id="buttonsDataGridPanel"
+            <buttonsPanel id="buttonsDataGridPanel1"
                           stylename="buttons-panel-padding">
-                <button id="excelDataGridBtn"
-                        action="ideasDataGrid.excel"
+                <button id="excelDataGridBtn1"
+                        action="ideasDataGrid1.excel"
                         stylename="excel"/>
-                <button id="editDataGridBtn"
-                        action="ideasDataGrid.view"
+                <button id="editDataGridBtn1"
+                        action="ideasDataGrid1.view"
                         stylename="secondary"/>
-                <button id="removeDataGridBtn"
-                        action="ideasDataGrid.remove"
+                <button id="removeDataGridBtn1"
+                        action="ideasDataGrid1.remove"
                         stylename="secondary"/>
             </buttonsPanel>
         </dataGrid>
+
+        <dataGrid id="ideasDataGrid2"
+                  dataContainer="ideasDc"
+                  height="100%"
+                  width="100%">
+            <actions>
+                <action id="excel"
+                        type="excel"/>
+                <action id="view"
+                        type="view"/>
+                <action id="remove" type="remove"/>
+            </actions>
+            <columns>
+                <column id="test1"
+                        property="test1"/>
+                <column id="test2"
+                        property="test2"/>
+                <column id="test3"
+                        property="test3"/>
+            </columns>
+            <buttonsPanel id="buttonsDataGridPanel2"
+                          stylename="buttons-panel-padding">
+                <button id="excelDataGridBtn2"
+                        action="ideasDataGrid2.excel"
+                        stylename="excel"/>
+                <button id="editDataGridBtn2"
+                        action="ideasDataGrid2.view"
+                        stylename="secondary"/>
+                <button id="removeDataGridBtn2"
+                        action="ideasDataGrid2.remove"
+                        stylename="secondary"/>
+            </buttonsPanel>
+        </dataGrid>
+
         <hbox id="votingBlock"
               spacing="true"
               visible="true">

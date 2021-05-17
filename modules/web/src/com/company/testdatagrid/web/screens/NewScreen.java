@@ -1,26 +1,20 @@
 package com.company.testdatagrid.web.screens;
 
 import com.company.testdatagrid.entity.NewEntity;
-import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.gui.Dialogs;
 import com.haulmont.cuba.gui.UiComponents;
-import com.haulmont.cuba.gui.actions.list.RemoveAction;
 import com.haulmont.cuba.gui.app.core.inputdialog.DialogActions;
 import com.haulmont.cuba.gui.app.core.inputdialog.DialogOutcome;
 import com.haulmont.cuba.gui.app.core.inputdialog.InputParameter;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.components.actions.BaseAction;
-import com.haulmont.cuba.gui.components.data.datagrid.ContainerDataGridItems;
 import com.haulmont.cuba.gui.model.CollectionContainer;
 import com.haulmont.cuba.gui.model.CollectionLoader;
-import com.haulmont.cuba.gui.model.DataComponents;
 import com.haulmont.cuba.gui.model.DataContext;
 import com.haulmont.cuba.gui.screen.*;
+import com.haulmont.cuba.web.gui.components.WebTabWindow;
 
-import javax.annotation.Nullable;
 import javax.inject.Inject;
-import javax.inject.Named;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -29,8 +23,7 @@ import java.util.stream.Stream;
 @UiController("testdatagrid_")
 @UiDescriptor("new-screen.xml")
 public class NewScreen extends StandardLookup<NewEntity> {
-    @Inject
-    private DataGrid<NewEntity> ideasDataGrid;
+
     @Inject
     private CollectionContainer<NewEntity> ideasDc;
     @Inject
@@ -42,31 +35,64 @@ public class NewScreen extends StandardLookup<NewEntity> {
     @Inject
     private Dialogs dialogs;
     @Inject
-    private DataManager dataManager;
+    private DataGrid<NewEntity> ideasDataGrid1;
     @Inject
-    private DataComponents dataComponents;
-    @Named("ideasDataGrid.remove")
-    private RemoveAction<NewEntity> ideasDataGridRemove;
+    private DataGrid<NewEntity> ideasDataGrid2;
+    @Inject
+    private Filter filter;
 
+    private DataGrid<NewEntity> activeDataGridProvider() {
+        if (ideasDataGrid1.isVisible()) {
+            return ideasDataGrid1;
+        }
+        return ideasDataGrid2;
+    }
+
+    private DataGrid<NewEntity> inactiveDataGridProvider() {
+        if (ideasDataGrid1.isVisible()) {
+            return ideasDataGrid2;
+        }
+        return ideasDataGrid1;
+    }
+
+    private void switchVisibility() {
+        ideasDataGrid1.setVisible(!ideasDataGrid1.isVisible());
+        ideasDataGrid2.setVisible(!ideasDataGrid2.isVisible());
+        for (NewEntity item : ideasDc.getItems()) {
+            activeDataGridProvider().setDetailsVisible(item, inactiveDataGridProvider().isDetailsVisible(item));
+        }
+        Component parent = ideasDataGrid2.getParent();
+        WebTabWindow window = (WebTabWindow) parent;
+        window.expand(activeDataGridProvider());
+        filter.setApplyTo(activeDataGridProvider());
+    }
 
     @Subscribe
     public void onInit(InitEvent event) {
-        ideasDataGrid.setItemClickAction(new BaseAction("itemClickAction")
+        ideasDataGrid1.setItemClickAction(new BaseAction("itemClickAction")
                 .withHandler(actionPerformedEvent ->
-                        ideasDataGrid.setDetailsVisible(ideasDataGrid.getSingleSelected(),
+                        ideasDataGrid1.setDetailsVisible(ideasDataGrid1.getSingleSelected(),
                                 true)));
+        ideasDataGrid2.setItemClickAction(new BaseAction("itemClickAction")
+                .withHandler(actionPerformedEvent ->
+                        ideasDataGrid2.setDetailsVisible(ideasDataGrid2.getSingleSelected(),
+                                true)));
+        ideasDataGrid1.setVisible(true);
+        ideasDataGrid1.setDetailsGenerator(this::ideasDataGridDetailsGenerator);
+        ideasDataGrid2.setDetailsGenerator(this::ideasDataGridDetailsGenerator);
+        ideasDataGrid2.setVisible(false);
+
     }
 
     @Subscribe
     public void onAfterShow(AfterShowEvent event) {
         for (NewEntity item : ideasDc.getItems()) {
-            ideasDataGrid.setDetailsVisible(item, true);
+            activeDataGridProvider().setDetailsVisible(item, true);
         }
     }
 
     @Subscribe("button")
     public void onButtonClick(Button.ClickEvent event) {
-
         List<InputParameter> inputParameters = Stream
                 .of(InputParameter.offsetTimeParameter("Comment").withField(() -> {
                     TextArea<String> commentField = uiComponents.create(TextArea.NAME);
@@ -75,31 +101,25 @@ public class NewScreen extends StandardLookup<NewEntity> {
                     commentField.setRows(5);
                     return commentField;
                 })).collect(Collectors.toList());
-        for (NewEntity item : ideasDc.getItems()) {
-            ideasDataGrid.setDetailsVisible(item, false);
-        }
         dialogs.createInputDialog(this).withCaption("messages.getMessage(votingResultType)")
                 .withParameters(inputParameters.toArray(new InputParameter[0]))
                 .withActions(DialogActions.OK_CANCEL)
                 .withCloseListener(closeEvent -> {
-
                     if (closeEvent.closedWith(DialogOutcome.OK)) {
-
+//
                         String comment = closeEvent.getValue("Comment");
-                        NewEntity singleSelected = ideasDataGrid.getSingleSelected();
+                        NewEntity singleSelected = activeDataGridProvider().getSingleSelected();
                         singleSelected.setTest3(comment);
                         dataContext.merge(singleSelected);
                         dataContext.commit();
                         ideasDl.load();
-//                        for (NewEntity item : ideasDc.getItems()) {
-//                            ideasDataGrid.setDetailsVisible(item, true);
-//                        }
+                        switchVisibility();
                     }
                 }).show();
 
     }
 
-    @Install(to = "ideasDataGrid", subject = "detailsGenerator")
+
     private Component ideasDataGridDetailsGenerator(NewEntity entity) {
         VBoxLayout mainLayout = uiComponents.create(VBoxLayout.NAME);
         mainLayout.setWidth("100%");
@@ -133,7 +153,7 @@ public class NewScreen extends StandardLookup<NewEntity> {
         closeButton.setIcon("icons/close.png");
         BaseAction closeAction = new BaseAction("closeAction")
                 .withHandler(actionPerformedEvent ->
-                        ideasDataGrid.setDetailsVisible(entity, false))
+                        activeDataGridProvider().setDetailsVisible(entity, false))
                 .withCaption("");
         closeButton.setAction(closeAction);
         return closeButton;
@@ -142,7 +162,7 @@ public class NewScreen extends StandardLookup<NewEntity> {
     @Subscribe("button2")
     public void onButton2Click(Button.ClickEvent event) {
         for (NewEntity item : ideasDc.getItems()) {
-            ideasDataGrid.setDetailsVisible(item, false);
+            activeDataGridProvider().setDetailsVisible(item, false);
         }
     }
 }
