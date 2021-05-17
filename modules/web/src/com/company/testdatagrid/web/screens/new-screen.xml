@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        caption="msg://newScreen.caption"
+        messagesPack="com.company.testdatagrid.web.screens">
+    <data>
+        <collection id="ideasDc" class="com.company.testdatagrid.entity.NewEntity" view="_local">
+            <loader id="ideasDl">
+                <query>
+                    <![CDATA[select e from testdatagrid_NewEntity e where e.test3 = '1' or e.test3 = '3']]>
+                </query>
+            </loader>
+        </collection>
+    </data>
+    <layout expand="vbox">
+        <filter applyTo="ideasDataGrid"
+                dataLoader="ideasDl">
+            <properties include=".*"/>
+        </filter>
+        <vbox id="vbox" >
+            <dataGrid id="ideasDataGrid"
+                      dataContainer="ideasDc"
+                      width="100%">
+                <actions>
+                    <action id="excel"
+                            type="excel"/>
+                    <action id="view"
+                            type="view"/>
+                    <action id="remove" type="remove"/>
+                </actions>
+                <columns>
+                    <column id="test1"
+                            property="test1"/>
+                    <column id="test2"
+                            property="test2"/>
+                    <column id="test3"
+                            property="test3"/>
+                </columns>
+                <buttonsPanel id="buttonsDataGridPanel"
+                              stylename="buttons-panel-padding">
+                    <button id="excelDataGridBtn"
+                            action="ideasDataGrid.excel"
+                            stylename="excel"/>
+                    <button id="editDataGridBtn"
+                            action="ideasDataGrid.view"
+                            stylename="secondary"/>
+                    <button id="removeDataGridBtn"
+                            action="ideasDataGrid.remove"
+                            stylename="secondary"/>
+                </buttonsPanel>
+            </dataGrid>
+        </vbox>
+        <hbox id="votingBlock"
+              spacing="true"
+              visible="true">
+            <button id="button"/>
+        </hbox>
+        <hbox id="lookupActions"
+              spacing="true"
+              visible="false">
+            <button action="lookupSelectAction"/>
+            <button action="lookupCancelAction"/>
+        </hbox>
+    </layout>
+</window>

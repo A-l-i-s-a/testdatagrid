@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        caption="msg://newEntityEdit.caption"
+        focusComponent="form"
+        messagesPack="com.company.testdatagrid.web.screens.newentity">
+    <data>
+        <instance id="newEntityDc"
+                  class="com.company.testdatagrid.entity.NewEntity">
+            <view extends="_local"/>
+            <loader/>
+        </instance>
+    </data>
+    <dialogMode height="600"
+                width="800"/>
+    <layout expand="editActions" spacing="true">
+        <form id="form" dataContainer="newEntityDc">
+            <column width="350px">
+                <textField id="test1Field" property="test1"/>
+                <textField id="test2Field" property="test2"/>
+                <textField id="test3Field" property="test3"/>
+            </column>
+        </form>
+        <hbox id="editActions" spacing="true">
+            <button action="windowCommitAndClose"/>
+            <button action="windowClose"/>
+        </hbox>
+    </layout>
+</window>
