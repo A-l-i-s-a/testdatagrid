@@ -45,8 +45,6 @@ public class NewScreen extends StandardLookup<NewEntity> {
     private DataManager dataManager;
     @Inject
     private DataComponents dataComponents;
-    @Inject
-    private VBoxLayout vbox;
     @Named("ideasDataGrid.remove")
     private RemoveAction<NewEntity> ideasDataGridRemove;
 
@@ -68,6 +66,7 @@ public class NewScreen extends StandardLookup<NewEntity> {
 
     @Subscribe("button")
     public void onButtonClick(Button.ClickEvent event) {
+
         List<InputParameter> inputParameters = Stream
                 .of(InputParameter.offsetTimeParameter("Comment").withField(() -> {
                     TextArea<String> commentField = uiComponents.create(TextArea.NAME);
@@ -76,43 +75,28 @@ public class NewScreen extends StandardLookup<NewEntity> {
                     commentField.setRows(5);
                     return commentField;
                 })).collect(Collectors.toList());
+        for (NewEntity item : ideasDc.getItems()) {
+            ideasDataGrid.setDetailsVisible(item, false);
+        }
         dialogs.createInputDialog(this).withCaption("messages.getMessage(votingResultType)")
                 .withParameters(inputParameters.toArray(new InputParameter[0]))
                 .withActions(DialogActions.OK_CANCEL)
                 .withCloseListener(closeEvent -> {
+
                     if (closeEvent.closedWith(DialogOutcome.OK)) {
+
                         String comment = closeEvent.getValue("Comment");
                         NewEntity singleSelected = ideasDataGrid.getSingleSelected();
                         singleSelected.setTest3(comment);
-//                        dataManager.commit(singleSelected);
-//                        dataContext.merge(singleSelected);
-//                        dataContext.commit();
-//                        ideasDl.load();
-//                        ideasDc.getMutableItems().remove(singleSelected);
-//                        List<NewEntity> items = ideasDc.getItems();
-//                        DataGrid<NewEntity> component = uiComponents.create(DataGrid.NAME);
-//                        CollectionContainer<NewEntity> collectionContainer = dataComponents.createCollectionContainer(NewEntity.class);
-//                        collectionContainer.setItems(items);
-//                        component.setItems(new ContainerDataGridItems<>(collectionContainer));
-//                        component.setDetailsGenerator(new DataGrid.DetailsGenerator<NewEntity>() {
-//                            @Nullable
-//                            @Override
-//                            public Component getDetails(NewEntity entity) {
-//                                return ideasDataGridDetailsGenerator(entity);
-//                            }
-//                        });
-//                        component.setItemClickAction(new BaseAction("itemClickAction")
-//                                .withHandler(actionPerformedEvent ->
-//                                        component.setDetailsVisible(component.getSingleSelected(),
-//                                                true)));
-//                        vbox.remove(ideasDataGrid);
-//                        component.setId("ideasDataGrid");
-//                        vbox.add(component);
-                        ideasDataGridRemove.execute();
-                        ideasDataGrid.repaint();
-
+                        dataContext.merge(singleSelected);
+                        dataContext.commit();
+                        ideasDl.load();
+//                        for (NewEntity item : ideasDc.getItems()) {
+//                            ideasDataGrid.setDetailsVisible(item, true);
+//                        }
                     }
                 }).show();
+
     }
 
     @Install(to = "ideasDataGrid", subject = "detailsGenerator")
@@ -153,5 +137,12 @@ public class NewScreen extends StandardLookup<NewEntity> {
                 .withCaption("");
         closeButton.setAction(closeAction);
         return closeButton;
+    }
+
+    @Subscribe("button2")
+    public void onButton2Click(Button.ClickEvent event) {
+        for (NewEntity item : ideasDc.getItems()) {
+            ideasDataGrid.setDetailsVisible(item, false);
+        }
     }
 }

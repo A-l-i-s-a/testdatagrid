@@ -12,13 +12,13 @@ public class NewEntity extends StandardEntity {
     private static final long serialVersionUID = -7549928590665483725L;
 
     @Column(name = "TEST1")
-    private String test1;
+    private String test1 = "1";
 
     @Column(name = "TEST2")
-    private String test2;
+    private String test2 = "1";
 
     @Column(name = "TEST3")
-    private String test3;
+    private String test3 = "1";
 
     public String getTest3() {
         return test3;
